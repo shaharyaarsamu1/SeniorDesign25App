@@ -1,0 +1,7 @@
+<resources>
+    <style name="Theme.SeniorDesignApp2" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@android:color/holo_blue_light</item>
+        <item name="colorOnPrimary">@android:color/white</item>
+        <item name="colorSecondary">@android:color/holo_green_light</item>
+    </style>
+</resources>
