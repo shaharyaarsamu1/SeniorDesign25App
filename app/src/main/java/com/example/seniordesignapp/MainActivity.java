@@ -28,13 +28,16 @@ public class MainActivity extends AppCompatActivity {
         // Button to go to Status Page
         Button statusButton = findViewById(R.id.go_to_status_button);
         statusButton.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, StatusPage.class);
+            Intent intent = new Intent(MainActivity.this, LoadingActivity.class);
+            intent.putExtra("destination", "toggle"); // will go to StatusPage after loading
             startActivity(intent);
+
         });
 
         Button graphsButton = findViewById(R.id.btn_view_graphs);
         graphsButton.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, OutletGraphsPage.class);
+            Intent intent = new Intent(MainActivity.this, LoadingActivity.class);
+            intent.putExtra("destination", "graph"); // will go to OutletGraphsPage after loading
             startActivity(intent);
         });
     }

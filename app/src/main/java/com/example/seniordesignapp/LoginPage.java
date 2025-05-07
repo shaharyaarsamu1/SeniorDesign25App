@@ -2,18 +2,15 @@ package com.example.seniordesignapp;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
+import android.os.Handler;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 
@@ -38,29 +35,23 @@ public class LoginPage extends AppCompatActivity {
         signupButton = findViewById(R.id.signup_button);
 
         // Login button functionality
-        loginButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String email = emailInput.getText().toString().trim();
-                String password = passwordInput.getText().toString().trim();
+        loginButton.setOnClickListener(view -> {
+            String email = emailInput.getText().toString().trim();
+            String password = passwordInput.getText().toString().trim();
 
-                if (email.isEmpty() || password.isEmpty()) {
-                    Toast.makeText(LoginPage.this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                makeLoginRequest(email, password);
+            if (email.isEmpty() || password.isEmpty()) {
+                Toast.makeText(LoginPage.this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
+                return;
             }
+
+            makeLoginRequest(email, password);
         });
 
         // Redirect to Signup page
-        signupButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(LoginPage.this, SignupPage.class);
-                startActivity(intent);
-                finish();
-            }
+        signupButton.setOnClickListener(view -> {
+            Intent intent = new Intent(LoginPage.this, SignupPage.class);
+            startActivity(intent);
+            finish();
         });
     }
 
@@ -80,33 +71,32 @@ public class LoginPage extends AppCompatActivity {
 
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
                 Request.Method.POST, url, jsonBody,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        try {
-                            String status = response.getString("status");
-                            if ("success".equals(status)) {
+                response -> {
+                    try {
+                        String status = response.optString("status", "");
+                        if ("success".equals(status)) {
+                            Toast.makeText(LoginPage.this, "Login successful!", Toast.LENGTH_SHORT).show();
 
-                                Toast.makeText(LoginPage.this, "Login successful!", Toast.LENGTH_SHORT).show();
-                                Intent intent = new Intent(LoginPage.this, MainActivity.class); // Replace with your HomePage activity
+                            // Add small delay to allow toast to finish showing
+                            new Handler().postDelayed(() -> {
+                                Intent intent = new Intent(LoginPage.this, LoadingActivity.class);
+                                intent.putExtra("destination", "main");
                                 startActivity(intent);
                                 finish();
-                            } else {
-                                String message = response.getString("message");
-                                Toast.makeText(LoginPage.this, message, Toast.LENGTH_SHORT).show();
-                            }
-                        } catch (Exception e) {
-                            e.printStackTrace();
+                            }, 300); // 0.3 second delay
+
+                        } else {
+                            String message = response.optString("message", "Login failed");
+                            Toast.makeText(LoginPage.this, message, Toast.LENGTH_SHORT).show();
+                        }
+                    } catch (Exception e) {
+                        if (!LoginPage.this.isFinishing()) {
                             Toast.makeText(LoginPage.this, "Error in response", Toast.LENGTH_SHORT).show();
                         }
                     }
                 },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Toast.makeText(LoginPage.this, "Error: " + error.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
-                    }
-                }) {
+                error -> Toast.makeText(LoginPage.this, "Error: " + error.getLocalizedMessage(), Toast.LENGTH_SHORT).show()
+        ) {
             @Override
             public Map<String, String> getHeaders() {
                 Map<String, String> headers = new HashMap<>();
